@@ -1,4 +1,5 @@
 #import <Foundation/Foundation.h>
+#import <Cordova/CDVCommandDelegate.h>
 
 @class GCDAsyncSocket;
 @class HTTPMessage;
@@ -62,9 +63,13 @@
 	UInt64 requestChunkSizeReceived;
   
 	NSMutableArray *responseDataSizes;
+    
+    id <CDVCommandDelegate> commandDelegate;
 }
 
-- (id)initWithAsyncSocket:(GCDAsyncSocket *)newSocket configuration:(HTTPConfig *)aConfig;
+@property (nonatomic, retain) NSDictionary* serverConfig;
+
+- (id)initWithAsyncSocket:(GCDAsyncSocket *)newSocket configuration:(HTTPConfig *)aConfig commandDelegate:(id<CDVCommandDelegate>)theCommandDelegate serverConfig:(NSDictionary*)theServerConfig;
 
 - (void)start;
 - (void)stop;

@@ -5,11 +5,21 @@ var argscheck = require('cordova/argscheck'),
 var corhttpd_exports = {};
 
 corhttpd_exports.startServer = function(options, success, error) {
-	  var defaults = {
-			    'www_root': '',
-			    'port': 8888,
-			    'localhost_only': false
-			  };
+    var defaults = {
+        'www_root': '',
+        'port': 8888,
+        'localhost_only': false,
+        'serverconfig': {
+            'mimetypes': {
+                'html': 'text/html',
+                'js': 'text/javascript',
+                'css': 'text/css',
+                'png': 'image/png',
+                'jpg': 'image/jpeg',
+                'jpeg': 'image/jpeg'
+            }
+        }
+    };
 	  
 	  // Merge optional settings into defaults.
 	  for (var key in defaults) {

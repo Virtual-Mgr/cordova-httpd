@@ -226,6 +226,26 @@ static const int httpLogLevel = HTTP_LOG_LEVEL_WARN; // | HTTP_LOG_FLAG_TRACE;
 	return filePath;
 }
 
+- (NSDictionary*)httpHeaders
+{
+    NSDictionary* mimetypes = [connection.serverConfig objectForKey:@"mimetypes"];
+    if (mimetypes == nil)
+        return nil;
+
+    NSString* fileExt = [filePath pathExtension];
+    if (fileExt == nil)
+        return nil;
+    
+    NSString* mimetype = [mimetypes objectForKey:fileExt];
+    if (mimetype == nil)
+        return nil;
+    
+    NSMutableDictionary* headers = [[NSMutableDictionary alloc] init];
+    [headers setObject: mimetype forKey: @"Content-Type"];
+    
+    return headers;
+}
+
 - (void)dealloc
 {
 	HTTPLogTrace();

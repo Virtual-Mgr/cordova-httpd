@@ -32,7 +32,7 @@ static const int httpLogLevel = HTTP_LOG_LEVEL_INFO; // | HTTP_LOG_FLAG_TRACE;
  * Standard Constructor.
  * Instantiates an HTTP server, but does not start it.
 **/
-- (id)init
+- (id)initWithCommandDelegate:(id<CDVCommandDelegate>)theCommandDelegate serverConfig:(NSDictionary *)theServerConfig
 {
 	if ((self = [super init]))
 	{
@@ -94,6 +94,9 @@ static const int httpLogLevel = HTTP_LOG_LEVEL_INFO; // | HTTP_LOG_FLAG_TRACE;
 		                                           object:nil];
 		
 		isRunning = NO;
+        
+        commandDelegate = theCommandDelegate;
+        serverConfig = theServerConfig;
 	}
 	return self;
 }
@@ -120,6 +123,8 @@ static const int httpLogLevel = HTTP_LOG_LEVEL_INFO; // | HTTP_LOG_FLAG_TRACE;
 	#endif
 	
 	[asyncSocket setDelegate:nil delegateQueue:NULL];
+    
+    commandDelegate = nil;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -546,8 +551,7 @@ static const int httpLogLevel = HTTP_LOG_LEVEL_INFO; // | HTTP_LOG_FLAG_TRACE;
 
 - (void)socket:(GCDAsyncSocket *)sock didAcceptNewSocket:(GCDAsyncSocket *)newSocket
 {
-	HTTPConnection *newConnection = (HTTPConnection *)[[connectionClass alloc] initWithAsyncSocket:newSocket
-	                                                                                 configuration:[self config]];
+	HTTPConnection *newConnection = (HTTPConnection *)[[connectionClass alloc] initWithAsyncSocket:newSocket configuration:[self config] commandDelegate:commandDelegate serverConfig:serverConfig];
 	[connectionsLock lock];
 	[connections addObject:newConnection];
 	[connectionsLock unlock];

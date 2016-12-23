@@ -93,6 +93,8 @@ static const int httpLogLevel = HTTP_LOG_LEVEL_WARN; // | HTTP_LOG_FLAG_TRACE;
 
 @implementation HTTPConnection
 
+@synthesize serverConfig;
+
 static dispatch_queue_t recentNonceQueue;
 static NSMutableArray *recentNonces;
 
@@ -173,7 +175,7 @@ static NSMutableArray *recentNonces;
  * Associates this new HTTP connection with the given AsyncSocket.
  * This HTTP connection object will become the socket's delegate and take over responsibility for the socket.
 **/
-- (id)initWithAsyncSocket:(GCDAsyncSocket *)newSocket configuration:(HTTPConfig *)aConfig
+- (id)initWithAsyncSocket:(GCDAsyncSocket *)newSocket configuration:(HTTPConfig *)aConfig commandDelegate:(id<CDVCommandDelegate>)theCommandDelegate serverConfig:(NSDictionary *)theServerConfig
 {
 	if ((self = [super init]))
 	{
@@ -209,6 +211,9 @@ static NSMutableArray *recentNonces;
 		numHeaderLines = 0;
 		
 		responseDataSizes = [[NSMutableArray alloc] initWithCapacity:5];
+        
+        commandDelegate = theCommandDelegate;
+        serverConfig = theServerConfig;
 	}
 	return self;
 }
@@ -231,6 +236,9 @@ static NSMutableArray *recentNonces;
 	{
 		[httpResponse connectionDidClose];
 	}
+    
+    commandDelegate = nil;
+    serverConfig = nil;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1685,8 +1693,22 @@ static NSMutableArray *recentNonces;
 		// Generally better for larger files.
 		
 	//	return [[[HTTPAsyncFileResponse alloc] initWithFilePath:filePath forConnection:self] autorelease];
-	}
-	
+    } else {
+        // Check the WWW folder
+        if ([path hasPrefix:@"/"]) {
+            path = [path substringFromIndex:1];
+        }
+        NSString* wwwPath = [commandDelegate pathForResource:path];
+        isDir = NO;
+        if (wwwPath && [[NSFileManager defaultManager] fileExistsAtPath:wwwPath isDirectory:&isDir] && !isDir)
+        {
+            return [[HTTPFileResponse alloc] initWithFilePath:wwwPath forConnection:self];
+        }
+    }
+    
+    //NSURL* startURL = [NSURL URLWithString:self.startPage];
+    //NSString* startFilePath = [self.commandDelegate pathForResource:[startURL path]];
+
 	return nil;
 }
 

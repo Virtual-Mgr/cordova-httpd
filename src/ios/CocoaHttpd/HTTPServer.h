@@ -1,4 +1,5 @@
 #import <Foundation/Foundation.h>
+#import <Cordova/CDVCommandDelegate.h>
 
 @class GCDAsyncSocket;
 @class WebSocket;
@@ -50,7 +51,12 @@
 	NSLock *webSocketsLock;
 	
 	BOOL isRunning;
+    
+    id<CDVCommandDelegate> commandDelegate;
+    NSDictionary* serverConfig;
 }
+
+- (id)initWithCommandDelegate:(id<CDVCommandDelegate>)theCommandDelegate serverConfig:(NSDictionary*)theServerConfig;
 
 /**
  * Specifies the document root to serve files from.
