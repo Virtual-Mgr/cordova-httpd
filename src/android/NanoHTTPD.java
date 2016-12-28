@@ -25,6 +25,8 @@ import java.util.TimeZone;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 
+import android.content.Context;
+import android.content.res.AssetManager;
 import android.util.Log;
 
 /**
@@ -74,7 +76,9 @@ import android.util.Log;
 public class NanoHTTPD
 {
 	private final String LOGTAG = "NanoHTTPD";
-	
+
+    private AssetManager _wwwAssets;
+
 	// ==================================================
 	// API parts
 	// ==================================================
@@ -223,8 +227,9 @@ public class NanoHTTPD
 	 * Starts a HTTP server to given port.<p>
 	 * Throws an IOException if the socket is already in use
 	 */
-	public NanoHTTPD(InetSocketAddress localAddr, AndroidFile wwwroot) throws IOException
+	public NanoHTTPD(InetSocketAddress localAddr, AndroidFile wwwroot, AssetManager wwwAssets) throws IOException
 	{
+        _wwwAssets = wwwAssets;
 		myTcpPort = localAddr.getPort();
 		myRootDir = wwwroot;
 		myServerSocket = new ServerSocket();
@@ -250,8 +255,9 @@ public class NanoHTTPD
 	 * Starts a HTTP server to given port.<p>
 	 * Throws an IOException if the socket is already in use
 	 */
-	public NanoHTTPD( int port, AndroidFile wwwroot ) throws IOException
+	public NanoHTTPD( int port, AndroidFile wwwroot, AssetManager wwwAssets ) throws IOException
 	{
+        _wwwAssets = wwwAssets;
 		myTcpPort = port;
 		this.myRootDir = wwwroot;
 		myServerSocket = new ServerSocket( myTcpPort );
@@ -316,7 +322,7 @@ public class NanoHTTPD
 
 		try
 		{
-			new NanoHTTPD( port, new AndroidFile(wwwroot.getPath()) );
+			new NanoHTTPD( port, new AndroidFile(wwwroot.getPath()), null );
 		}
 		catch( IOException ioe )
 		{
@@ -921,8 +927,18 @@ public class NanoHTTPD
 
 		AndroidFile f = new AndroidFile( homeDir, uri );
 		if ( res == null && !f.exists())
-			res = new Response( HTTP_NOTFOUND, MIME_PLAINTEXT,
-					"Error 404, file not found." );
+		{
+			// Try www folder
+			f = new AndroidFile("www", uri);
+
+            f.setAssetManager( _wwwAssets );
+
+            if (!f.exists())
+			{
+				res = new Response(HTTP_NOTFOUND, MIME_PLAINTEXT,
+						"Error 404, file not found.");
+			}
+		}
 
 		// List the directory, if necessary
 		if ( res == null && f.isDirectory())

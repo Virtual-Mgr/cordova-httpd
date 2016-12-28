@@ -147,9 +147,9 @@ public class CorHttpd extends CordovaPlugin {
     		
     		if(localhost_only) {
     			InetSocketAddress localAddr = new InetSocketAddress(InetAddress.getByAddress(new byte[]{127,0,0,1}), port);
-    			server = new WebServer(localAddr, f);
+    			server = new WebServer(localAddr, f, am);
     		} else {
-    			server = new WebServer(port, f);
+    			server = new WebServer(port, f, am);
     		}
 		} catch (IOException e) {
 			errmsg = String.format("IO Exception: %s", e.getMessage());
