@@ -9,16 +9,15 @@ corhttpd_exports.startServer = function(options, success, error) {
         'www_root': '',
         'port': 8888,
         'localhost_only': false,
-        'serverconfig': {
-            'mimetypes': {
-                'html': 'text/html',
-                'js': 'text/javascript',
-                'css': 'text/css',
-                'png': 'image/png',
-                'jpg': 'image/jpeg',
-                'jpeg': 'image/jpeg'
-            }
-        }
+        'mimetypes': {
+            'html': 'text/html',
+            'js': 'text/javascript',
+            'css': 'text/css',
+            'png': 'image/png',
+            'jpg': 'image/jpeg',
+            'jpeg': 'image/jpeg'
+        },
+        'serve_order': 0		// 0 = FileThenWWW, 1 = WWWThenFile
     };
 	  
 	  // Merge optional settings into defaults.

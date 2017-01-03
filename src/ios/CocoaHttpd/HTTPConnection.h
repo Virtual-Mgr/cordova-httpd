@@ -16,9 +16,9 @@
 
 @interface HTTPConfig : NSObject
 {
-	HTTPServer __unsafe_unretained *server;
-	NSString __strong *documentRoot;
-	dispatch_queue_t queue;
+    HTTPServer __unsafe_unretained *server;
+    NSString __strong *documentRoot;
+    dispatch_queue_t queue;
 }
 
 - (id)initWithServer:(HTTPServer *)server documentRoot:(NSString *)documentRoot;
@@ -34,37 +34,44 @@
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+typedef enum _ServeOrder
+{
+    FileThenWWW = 0,
+    WWWThenFile = 1
+} ServeOrder;
+
 @interface HTTPConnection : NSObject
 {
-	dispatch_queue_t connectionQueue;
-	GCDAsyncSocket *asyncSocket;
-	HTTPConfig *config;
-	
-	BOOL started;
-	
-	HTTPMessage *request;
-	unsigned int numHeaderLines;
-	
-	BOOL sentResponseHeaders;
-	
-	NSString *nonce;
-	long lastNC;
-	
-	NSObject<HTTPResponse> *httpResponse;
-	
-	NSMutableArray *ranges;
-	NSMutableArray *ranges_headers;
-	NSString *ranges_boundry;
-	int rangeIndex;
-	
-	UInt64 requestContentLength;
-	UInt64 requestContentLengthReceived;
-	UInt64 requestChunkSize;
-	UInt64 requestChunkSizeReceived;
-  
-	NSMutableArray *responseDataSizes;
+    dispatch_queue_t connectionQueue;
+    GCDAsyncSocket *asyncSocket;
+    HTTPConfig *config;
+    
+    BOOL started;
+    
+    HTTPMessage *request;
+    unsigned int numHeaderLines;
+    
+    BOOL sentResponseHeaders;
+    
+    NSString *nonce;
+    long lastNC;
+    
+    NSObject<HTTPResponse> *httpResponse;
+    
+    NSMutableArray *ranges;
+    NSMutableArray *ranges_headers;
+    NSString *ranges_boundry;
+    int rangeIndex;
+    
+    UInt64 requestContentLength;
+    UInt64 requestContentLengthReceived;
+    UInt64 requestChunkSize;
+    UInt64 requestChunkSizeReceived;
+    
+    NSMutableArray *responseDataSizes;
     
     id <CDVCommandDelegate> commandDelegate;
+    ServeOrder _serveOrder;
 }
 
 @property (nonatomic, retain) NSDictionary* serverConfig;
