@@ -1,5 +1,5 @@
 {
-  "name": "cordova-httpd",
+  "name": "com.rjfun.cordova.httpd",
   "version": "1.2.0",
   "description": "CorHttpd is an plugin with embedded web server into Cordova",
   "cordova": {
