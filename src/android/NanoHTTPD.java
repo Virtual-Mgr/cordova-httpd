@@ -14,8 +14,10 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.URLEncoder;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Vector;
 import java.util.Hashtable;
 import java.util.Locale;
@@ -78,6 +80,9 @@ public class NanoHTTPD
 	private final String LOGTAG = "NanoHTTPD";
 
     private AssetManager _wwwAssets;
+	private List<String> _noneSpaExtensions = Arrays.asList(
+		"map", "js", "woff2", "json", "png", "jpg", "jpeg", "css", "ico"
+	);
 
 	// ==================================================
 	// API parts
@@ -203,6 +208,7 @@ public class NanoHTTPD
 	HTTP_PARTIALCONTENT = "206 Partial Content",
 	HTTP_RANGE_NOT_SATISFIABLE = "416 Requested Range Not Satisfiable",
 	HTTP_REDIRECT = "301 Moved Permanently",
+	HTTP_TEMPORARY_REDIRECT = "302 Moved Temporarily",
 	HTTP_NOTMODIFIED = "304 Not Modified",
 	HTTP_FORBIDDEN = "403 Forbidden",
 	HTTP_NOTFOUND = "404 Not Found",
@@ -935,8 +941,20 @@ public class NanoHTTPD
 
             if (!f.exists())
 			{
-				res = new Response(HTTP_NOTFOUND, MIME_PLAINTEXT,
-						"Error 404, file not found.");
+				// For SPA 404's we need to serve /index.html unless its a PNG, JPEG etc ..
+				int i = f.getName().lastIndexOf('.');
+				if (i > 0) {
+					String extension = f.getName().substring(i+1);
+					if (_noneSpaExtensions.contains(extension)) {
+						res = new Response(HTTP_NOTFOUND, MIME_PLAINTEXT,
+								"Error 404, file not found.");
+					}
+				}
+				if (res == null) {
+					// Client is probably asking for a SPA Virtual URL so we serve /index.html
+					res = new Response(HTTP_TEMPORARY_REDIRECT, MIME_PLAINTEXT, "302 Moved Temporarily");
+					res.addHeader("location", "/index.html");
+				}
 			}
 		}
 
