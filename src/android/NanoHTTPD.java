@@ -941,9 +941,10 @@ public class NanoHTTPD
 
             if (!f.exists())
 			{
+				// For AngularJs virtual route /vmplayer/a/ we serve index.html
 				if (uri.startsWith("/vmplayer/a/")) {
 					res = new Response(HTTP_TEMPORARY_REDIRECT, MIME_PLAINTEXT, "302 Moved Temporarily");
-					res.addHeader("location", "/index.html");
+					res.addHeader("location", "/vmplayer/index.html");
 				}
 			}
 		}
