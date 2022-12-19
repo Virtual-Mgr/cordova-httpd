@@ -941,17 +941,7 @@ public class NanoHTTPD
 
             if (!f.exists())
 			{
-				// For SPA 404's we need to serve /index.html unless its a PNG, JPEG etc ..
-				int i = f.getName().lastIndexOf('.');
-				if (i > 0) {
-					String extension = f.getName().substring(i+1);
-					if (_noneSpaExtensions.contains(extension)) {
-						res = new Response(HTTP_NOTFOUND, MIME_PLAINTEXT,
-								"Error 404, file not found.");
-					}
-				}
-				if (res == null) {
-					// Client is probably asking for a SPA Virtual URL so we serve /index.html
+				if (uri.startsWith("/vmplayer/a/")) {
 					res = new Response(HTTP_TEMPORARY_REDIRECT, MIME_PLAINTEXT, "302 Moved Temporarily");
 					res.addHeader("location", "/index.html");
 				}
