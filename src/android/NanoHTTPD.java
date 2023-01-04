@@ -80,9 +80,7 @@ public class NanoHTTPD
 	private final String LOGTAG = "NanoHTTPD";
 
     private AssetManager _wwwAssets;
-	private List<String> _noneSpaExtensions = Arrays.asList(
-		"map", "js", "woff2", "json", "png", "jpg", "jpeg", "css", "ico"
-	);
+	private JSONObject _spaConfig = null;
 
 	// ==================================================
 	// API parts
@@ -939,12 +937,29 @@ public class NanoHTTPD
 
             f.setAssetManager( _wwwAssets );
 
-            if (!f.exists())
+            if (!f.exists() && _spaConfig != null)
 			{
-				// For AngularJs virtual route /vmplayer/a/ we serve index.html
-				if (uri.startsWith("/vmplayer/a/")) {
+				String path = uri.toString();
+				Iterator<String> prefixes = _spaConfig.keys();
+				while(keys.hasNext() && res == null) {
+					String prefix = keys.next().toString();
+					if (uri.startsWith(prefix) || uri == prefix) {
+						res = new Response(H)
+					}
+				}
+				// For SPA 404's we need to serve /index.html unless its a PNG, JPEG etc ..
+				int i = f.getName().lastIndexOf('.');
+				if (i > 0) {
+					String extension = f.getName().substring(i+1);
+					if (_noneSpaExtensions.contains(extension)) {
+						res = new Response(HTTP_NOTFOUND, MIME_PLAINTEXT,
+								"Error 404, file not found.");
+					}
+				}
+				if (res == null) {
+					// Client is probably asking for a SPA Virtual URL so we serve /index.html
 					res = new Response(HTTP_TEMPORARY_REDIRECT, MIME_PLAINTEXT, "302 Moved Temporarily");
-					res.addHeader("location", "/vmplayer/index.html");
+					res.addHeader("location", "/index.html");
 				}
 			}
 		}

@@ -33,6 +33,7 @@ public class CorHttpd extends CordovaPlugin {
     private static final String ACTION_STOP_SERVER = "stopServer";
     private static final String ACTION_GET_URL = "getURL";
     private static final String ACTION_GET_LOCAL_PATH = "getLocalPath";
+    private static final String ACTION_SET_SPA_CONFIG = "setSpaConfig";
 
     private static final String OPT_WWW_ROOT = "www_root";
     private static final String OPT_PORT = "port";
@@ -69,6 +70,10 @@ public class CorHttpd extends CordovaPlugin {
 
         } else if (ACTION_GET_LOCAL_PATH.equals(action)) {
             result = getLocalPath(inputs, callbackContext);
+
+        } else if (ACTION_SET_SPA_CONFIG.equals(action)) {
+            result = setSpaConfig(inputs, callbackContext);
+        }
 
         } else {
             Log.d(LOGTAG, String.format("Invalid action passed: %s", action));
@@ -205,6 +210,12 @@ public class CorHttpd extends CordovaPlugin {
         });
 
         return null;
+    }
+
+    private PluginResult setSpaConfig(JSONArray inputs, CallbackContext callbackContext) {
+		Log.w(LOGTAG, "setSpaConfig");
+
+        JSONObject config = inputs.optJSONObject(0);
     }
 
     /**
