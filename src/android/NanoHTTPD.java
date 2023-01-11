@@ -17,6 +17,7 @@ import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 import java.util.Hashtable;
@@ -30,6 +31,7 @@ import java.io.FileOutputStream;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.util.Log;
+import org.json.JSONObject;
 
 /**
  * A simple, tiny, nicely embeddable HTTP 1.0 (partially 1.1) server in Java
@@ -75,6 +77,7 @@ import android.util.Log;
  * (Modified BSD licence)
  */
 @SuppressWarnings("unchecked")
+
 public class NanoHTTPD
 {
 	private final String LOGTAG = "NanoHTTPD";
@@ -296,6 +299,10 @@ public class NanoHTTPD
 		catch ( InterruptedException e ) {}
 	}
 
+	public void setSpaConfig(JSONObject config)
+	{
+		_spaConfig = config;
+	}
 
 	/**
 	 * Starts as a standalone file server and waits for Enter.
@@ -929,6 +936,21 @@ public class NanoHTTPD
 						"FORBIDDEN: Won't serve ../ for security reasons." );
 		}
 
+		if (_spaConfig != null) {
+			String path = uri.toString();
+			Iterator<String> prefixes = _spaConfig.keys();
+			while (prefixes.hasNext() && res == null) {
+				String prefix = prefixes.next().toString();
+				if (uri.startsWith(prefix) || uri == prefix) {
+					try {
+						uri = _spaConfig.getString(prefix);
+					} catch (Exception _) {
+						// This should never happen since we are iterating the keys, however compiler insists we cover the possible exception
+					}
+				}
+			}
+		}
+
 		AndroidFile f = new AndroidFile( homeDir, uri );
 		if ( res == null && !f.exists())
 		{
@@ -936,32 +958,6 @@ public class NanoHTTPD
 			f = new AndroidFile("www", uri);
 
             f.setAssetManager( _wwwAssets );
-
-            if (!f.exists() && _spaConfig != null)
-			{
-				String path = uri.toString();
-				Iterator<String> prefixes = _spaConfig.keys();
-				while(keys.hasNext() && res == null) {
-					String prefix = keys.next().toString();
-					if (uri.startsWith(prefix) || uri == prefix) {
-						res = new Response(H)
-					}
-				}
-				// For SPA 404's we need to serve /index.html unless its a PNG, JPEG etc ..
-				int i = f.getName().lastIndexOf('.');
-				if (i > 0) {
-					String extension = f.getName().substring(i+1);
-					if (_noneSpaExtensions.contains(extension)) {
-						res = new Response(HTTP_NOTFOUND, MIME_PLAINTEXT,
-								"Error 404, file not found.");
-					}
-				}
-				if (res == null) {
-					// Client is probably asking for a SPA Virtual URL so we serve /index.html
-					res = new Response(HTTP_TEMPORARY_REDIRECT, MIME_PLAINTEXT, "302 Moved Temporarily");
-					res.addHeader("location", "/index.html");
-				}
-			}
 		}
 
 		// List the directory, if necessary

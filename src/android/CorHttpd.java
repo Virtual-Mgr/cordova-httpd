@@ -73,7 +73,6 @@ public class CorHttpd extends CordovaPlugin {
 
         } else if (ACTION_SET_SPA_CONFIG.equals(action)) {
             result = setSpaConfig(inputs, callbackContext);
-        }
 
         } else {
             Log.d(LOGTAG, String.format("Invalid action passed: %s", action));
@@ -216,6 +215,11 @@ public class CorHttpd extends CordovaPlugin {
 		Log.w(LOGTAG, "setSpaConfig");
 
         JSONObject config = inputs.optJSONObject(0);
+        server.setSpaConfig(config);
+
+        callbackContext.success();
+
+        return null;
     }
 
     /**
